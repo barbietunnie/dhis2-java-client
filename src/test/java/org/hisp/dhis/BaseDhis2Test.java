@@ -160,60 +160,66 @@ class BaseDhis2Test {
   }
 
   @Test
-  void testHandleErrorsThrowsForGatewayHtmlResponse() {
+  void testHandleErrorsThrowsForGatewayHtmlResponse() throws IOException {
     Dhis2 dhis2 = new Dhis2(TestFixture.DEFAULT_CONFIG);
 
-    BasicClassicHttpResponse response = new BasicClassicHttpResponse(502);
-    response.setEntity(
-        new StringEntity("<html><body>502 Bad Gateway</body></html>", ContentType.TEXT_HTML));
+    try (BasicClassicHttpResponse response = new BasicClassicHttpResponse(502)) {
+      response.setEntity(
+          new StringEntity("<html><body>502 Bad Gateway</body></html>", ContentType.TEXT_HTML));
 
-    Dhis2ClientException ex =
-        assertThrows(
-            Dhis2ClientException.class,
-            () ->
-                dhis2.handleErrors(
-                    response, "https://server.org/api/completeDataSetRegistrations"));
+      Dhis2ClientException ex =
+          assertThrows(
+              Dhis2ClientException.class,
+              () ->
+                  dhis2.handleErrors(
+                      response, "https://server.org/api/completeDataSetRegistrations"));
 
-    assertEquals(502, ex.getStatusCode());
-    assertTrue(ex.getMessage().contains("502"), ex.getMessage());
-    assertTrue(ex.getMessage().contains("502 Bad Gateway"), ex.getMessage());
+      assertEquals(502, ex.getStatusCode());
+      assertTrue(ex.getMessage().contains("502"), ex.getMessage());
+      assertTrue(ex.getMessage().contains("502 Bad Gateway"), ex.getMessage());
+    }
   }
 
   @Test
-  void testHandleErrorsThrowsForErrorResponseWithoutContentType() {
+  void testHandleErrorsThrowsForErrorResponseWithoutContentType() throws IOException {
     Dhis2 dhis2 = new Dhis2(TestFixture.DEFAULT_CONFIG);
 
-    BasicClassicHttpResponse response = new BasicClassicHttpResponse(503);
-    response.setEntity(new StringEntity("Service Unavailable", (ContentType) null));
+    try (BasicClassicHttpResponse response = new BasicClassicHttpResponse(503)) {
+      response.setEntity(new StringEntity("Service Unavailable", (ContentType) null));
 
-    Dhis2ClientException ex =
-        assertThrows(
-            Dhis2ClientException.class,
-            () -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
+      Dhis2ClientException ex =
+          assertThrows(
+              Dhis2ClientException.class,
+              () -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
 
-    assertEquals(503, ex.getStatusCode());
+      assertEquals(503, ex.getStatusCode());
+    }
   }
 
   @Test
-  void testHandleErrorsIgnoresJsonErrorResponse() {
+  void testHandleErrorsIgnoresJsonErrorResponse() throws IOException {
     Dhis2 dhis2 = new Dhis2(TestFixture.DEFAULT_CONFIG);
 
-    BasicClassicHttpResponse response = new BasicClassicHttpResponse(409);
-    response.setEntity(
-        new StringEntity(
-            "{\"status\":\"ERROR\",\"httpStatusCode\":409}", ContentType.APPLICATION_JSON));
+    try (BasicClassicHttpResponse response = new BasicClassicHttpResponse(409)) {
+      response.setEntity(
+          new StringEntity(
+              "{\"status\":\"ERROR\",\"httpStatusCode\":409}", ContentType.APPLICATION_JSON));
 
-    // A JSON error body (e.g. a DHIS2 conflict WebMessage) must be left for the caller to parse.
-    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
+      // A JSON error body (e.g. a DHIS2 conflict WebMessage) must be left for the caller to parse.
+      assertDoesNotThrow(
+          () -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
+    }
   }
 
   @Test
-  void testHandleErrorsIgnoresSuccessfulResponse() {
+  void testHandleErrorsIgnoresSuccessfulResponse() throws IOException {
     Dhis2 dhis2 = new Dhis2(TestFixture.DEFAULT_CONFIG);
 
-    BasicClassicHttpResponse response = new BasicClassicHttpResponse(200);
-    response.setEntity(new StringEntity("{\"status\":\"OK\"}", ContentType.APPLICATION_JSON));
+    try (BasicClassicHttpResponse response = new BasicClassicHttpResponse(200)) {
+      response.setEntity(new StringEntity("{\"status\":\"OK\"}", ContentType.APPLICATION_JSON));
 
-    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
+      assertDoesNotThrow(
+          () -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
+    }
   }
 }
