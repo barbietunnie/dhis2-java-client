@@ -1239,6 +1239,8 @@ public class BaseDhis2 {
       return StringUtils.abbreviate(
           StringUtils.normalizeSpace(body), MAX_ERROR_BODY_SNIPPET_LENGTH);
     } catch (IOException | ParseException ex) {
+      log.debug("Failed to read response body for snippet", ex);
+
       return StringUtils.EMPTY;
     }
   }
