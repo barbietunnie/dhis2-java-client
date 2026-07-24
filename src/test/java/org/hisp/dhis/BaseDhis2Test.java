@@ -104,14 +104,14 @@ class BaseDhis2Test {
 
   @Test
   void testWithMetadataImportParams() throws Exception {
-    Dhis2Config config = new Dhis2Config("https://company.com", "admin", "distrct");
-    Dhis2 dhis2 = new Dhis2(new Dhis2Config("https://company.com", "admin", "distrct"));
+    Dhis2Config config = new Dhis2Config("https://server.org", "admin", "distrct");
+    Dhis2 dhis2 = new Dhis2(new Dhis2Config("https://server.org", "admin", "distrct"));
     URIBuilder uriBuilder = config.getResolvedUriBuilder().appendPath("metadata");
 
     URI expected =
         new URI(
             """
-            https://company.com/api/metadata\
+            https://server.org/api/metadata\
             ?importStrategy=CREATE_AND_UPDATE\
             &atomicMode=ALL\
             &skipSharing=false\
@@ -172,7 +172,7 @@ class BaseDhis2Test {
             Dhis2ClientException.class,
             () ->
                 dhis2.handleErrors(
-                    response, "https://company.com/api/completeDataSetRegistrations"));
+                    response, "https://server.org/api/completeDataSetRegistrations"));
 
     assertEquals(502, ex.getStatusCode());
     assertTrue(ex.getMessage().contains("502"), ex.getMessage());
@@ -189,7 +189,7 @@ class BaseDhis2Test {
     Dhis2ClientException ex =
         assertThrows(
             Dhis2ClientException.class,
-            () -> dhis2.handleErrors(response, "https://company.com/api/dataValueSets"));
+            () -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
 
     assertEquals(503, ex.getStatusCode());
   }
@@ -204,7 +204,7 @@ class BaseDhis2Test {
             "{\"status\":\"ERROR\",\"httpStatusCode\":409}", ContentType.APPLICATION_JSON));
 
     // A JSON error body (e.g. a DHIS2 conflict WebMessage) must be left for the caller to parse.
-    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://company.com/api/dataValueSets"));
+    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
   }
 
   @Test
@@ -214,6 +214,6 @@ class BaseDhis2Test {
     BasicClassicHttpResponse response = new BasicClassicHttpResponse(200);
     response.setEntity(new StringEntity("{\"status\":\"OK\"}", ContentType.APPLICATION_JSON));
 
-    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://company.com/api/dataValueSets"));
+    assertDoesNotThrow(() -> dhis2.handleErrors(response, "https://server.org/api/dataValueSets"));
   }
 }
