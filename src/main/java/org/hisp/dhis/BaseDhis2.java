@@ -1521,12 +1521,11 @@ public class BaseDhis2 {
                 .appendPath(collection)
                 .appendPath(item));
 
-    Response response = executeRequest(new HttpPost(url));
+    Response response =
+        Objects.requireNonNull(executeRequest(new HttpPost(url)), "Response must not be null");
 
     Status status =
-        response != null
-                && response.getHttpStatus() != null
-                && response.getHttpStatus().is2xxSuccessful()
+        response.getHttpStatus() != null && response.getHttpStatus().is2xxSuccessful()
             ? Status.OK
             : Status.ERROR;
 
